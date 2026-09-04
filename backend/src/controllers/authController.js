@@ -49,7 +49,7 @@ const login = async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: 'Something went wrong. Please try again.',
+      message: error.message || 'Something went wrong. Please try again.',
     });
   }
 };
