@@ -108,30 +108,30 @@ const ChatWidget = () => {
           </div>
         )}
 
-        {/* Floating Action Toggle Button */}
+        {/* Floating Action Toggle Button - Icon Only */}
         <button
           type="button"
           id="disaster-chatbot-toggle"
           onClick={() => setIsOpen(!isOpen)}
+          title={isOpen ? 'Close Disaster Assistant' : 'Open Disaster Assistant'}
           aria-label={isOpen ? 'Close Disaster Assistant' : 'Open Disaster Assistant'}
-          className={`relative p-3.5 sm:px-4 sm:py-3 rounded-2xl shadow-xl transition-all duration-300 flex items-center gap-2.5 font-semibold text-white ${
+          className={`relative w-14 h-14 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center text-white ${
             isOpen
-              ? 'bg-slate-800 hover:bg-slate-900 ring-2 ring-slate-400/20'
-              : 'bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 ring-4 ring-blue-500/20 hover:scale-105 active:scale-95'
+              ? 'bg-slate-800 hover:bg-slate-900 ring-2 ring-slate-400/30'
+              : 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 ring-4 ring-blue-500/25 hover:scale-110 active:scale-95 shadow-indigo-600/30'
           }`}
         >
           {isOpen ? (
             <X className="w-6 h-6 text-white" />
           ) : (
-            <>
-              <div className="relative flex items-center justify-center">
-                <Bot className="w-6 h-6 text-white" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-blue-700 rounded-full" />
-              </div>
-              <span className="hidden sm:inline text-sm font-bold tracking-tight">
-                Disaster Assistant
+            <div className="relative flex items-center justify-center">
+              <Bot className="w-7 h-7 text-white" />
+              {/* Pulsing online status indicator */}
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400 border-2 border-indigo-700" />
               </span>
-            </>
+            </div>
           )}
         </button>
       </div>
