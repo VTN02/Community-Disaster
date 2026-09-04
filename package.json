@@ -1,0 +1,11 @@
+{
+  "name": "disaster-management-lk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sri Lanka Community Disaster Management Platform",
+  "scripts": {
+    "postinstall": "cd backend && npm install",
+    "build": "cd backend && npm install",
+    "start": "node backend/src/server.js"
+  }
+}
