@@ -1,8 +1,26 @@
 # 🇱🇰 Disaster Management LK
 
-> **Report danger. Stay informed. Stay safe.**
+> **Report danger. Stay informed. Stay safe.**  
+> A community-powered disaster reporting and situational awareness platform for Sri Lanka, built for the SLIIT SE3090 Assignment 2 Mini Hackathon ("Build for Sri Lanka").
 
-A community-powered disaster reporting and information platform for Sri Lanka, built for rapid deployment during the Hackathon.
+---
+
+### 📌 Hackathon Deliverable Links & Metadata
+- **Group ID**: `[Insert Group ID, e.g., WE_04]`
+- **Repository**: [https://github.com/VTN02/Community-Disaster.git](https://github.com/VTN02/Community-Disaster.git)
+- **Live Deployed Application**: [https://community-disaster.vercel.app/](https://community-disaster.vercel.app/)
+- **Two-Minute Demonstration Video**: `[Insert OneDrive / YouTube / Drive Link]`
+- **Full Documentation Report**: See [`DOCUMENTATION_REPORT.md`](./DOCUMENTATION_REPORT.md) or open [`DOCUMENTATION_REPORT.html`](./DOCUMENTATION_REPORT.html) in your browser to print as PDF.
+
+---
+
+### 👥 Team Members & Contributions
+| Student ID | Full Name | Role | Key Contributions |
+| :--- | :--- | :--- | :--- |
+| `[IT Number 1]` | **Vijaya Kumar Vithusan** | Backend & DB Architecture | Express API, MongoDB models, JWT auth, Atlas DNS resolver fix, seed scripts, server deployment. |
+| `[IT Number 2]` | **Y. H. Prasad** | UI & Frontend Frameworks | Responsive React components, Tailwind styling, DMC operational hero assets, Navbar, Disaster Cards. |
+| `[IT Number 3]` | **[Member 3 Name]** | Forms & Mapping | Disaster Report form, React Hook Form + Zod validation, Leaflet/OSM GPS pin picker. |
+| `[IT Number 4]` | **[Member 4 Name]** | QA, Deployment & Demo | Integration testing, Git version control, Vercel frontend CI/CD, 2-minute video lead. |
 
 ---
 
