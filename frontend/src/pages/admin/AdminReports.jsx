@@ -1,28 +1,45 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { Trash2, CheckCircle, XCircle, Eye, ChevronDown, Filter, RefreshCw } from 'lucide-react';
-import { reportsApi } from '../../services/api';
+import {
+  Search,
+  Filter,
+  RefreshCw,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Shield,
+  MapPin,
+  Clock,
+  Sparkles,
+  AlertTriangle,
+} from 'lucide-react';
+import { reportsApi, assignmentsApi } from '../../services/api';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminReportModal from '../../components/admin/AdminReportModal';
-import SeverityBadge from '../../components/common/SeverityBadge';
-import StatusBadge from '../../components/common/StatusBadge';
+import Badge from '../../components/common/Badge';
+import Button from '../../components/common/Button';
+import Card from '../../components/common/Card';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import EmptyState from '../../components/common/EmptyState';
 import { showToast } from '../../components/common/Toast';
-import { DISASTER_ICONS, VERIFICATION_CONFIG, timeAgo, DISASTER_TYPES, SRI_LANKA_DISTRICTS } from '../../utils/constants';
+import { DISASTER_TYPES, SRI_LANKA_DISTRICTS, timeAgo } from '../../utils/constants';
 
 const SEVERITY_OPTIONS = ['low', 'medium', 'high', 'critical'];
 const STATUS_OPTIONS = ['pending', 'investigating', 'resolved', 'rejected'];
 const VERIFICATION_OPTIONS = ['pending', 'verified', 'rejected'];
 
 const ConfirmModal = ({ message, onConfirm, onCancel }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-      <h3 className="font-bold text-slate-900 mb-2">Confirm Action</h3>
-      <p className="text-slate-600 text-sm mb-6">{message}</p>
-      <div className="flex gap-3">
-        <button onClick={onCancel} className="btn-ghost border border-slate-200 flex-1 justify-center">Cancel</button>
-        <button onClick={onConfirm} className="btn-danger flex-1 justify-center">Confirm</button>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
+    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-200">
+      <h3 className="font-bold text-slate-900 text-base mb-2">Confirm Action</h3>
+      <p className="text-slate-600 text-xs sm:text-sm mb-6 leading-relaxed">{message}</p>
+      <div className="flex gap-2.5">
+        <Button variant="outline" size="sm" fullWidth onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button variant="danger" size="sm" fullWidth onClick={onConfirm}>
+          Confirm
+        </Button>
       </div>
     </div>
   </div>
@@ -32,9 +49,17 @@ const AdminReports = () => {
   const [reports, setReports] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ search: '', type: '', severity: '', status: '', verificationStatus: '', district: '' });
+  const [filters, setFilters] = useState({
+    search: '',
+    type: '',
+    severity: '',
+    status: '',
+    verificationStatus: '',
+    district: '',
+  });
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [dispatchLoading, setDispatchLoading] = useState({});
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -78,7 +103,7 @@ const AdminReports = () => {
   const handleDelete = async (id) => {
     try {
       await reportsApi.delete(id);
-      showToast('Report deleted.', 'success');
+      showToast('Report deleted from database.', 'success');
       setDeleteConfirm(null);
       fetchReports();
     } catch {
@@ -89,7 +114,7 @@ const AdminReports = () => {
   const handleStatusChange = async (id, status) => {
     try {
       await reportsApi.updateStatus(id, { status });
-      showToast('Status updated.', 'success');
+      showToast(`Status updated to ${status}.`, 'success');
       fetchReports();
     } catch {
       showToast('Failed to update status.', 'error');
@@ -99,151 +124,296 @@ const AdminReports = () => {
   const handleSeverityChange = async (id, severity) => {
     try {
       await reportsApi.update(id, { severity });
-      showToast('Severity updated.', 'success');
+      showToast(`Severity adjusted to ${severity}.`, 'success');
       fetchReports();
     } catch {
       showToast('Failed to update severity.', 'error');
     }
   };
 
-  const setFilter = (key, val) => setFilters((p) => ({ ...p, [key]: val }));
+  const handleAutoDispatch = async (reportId) => {
+    setDispatchLoading((prev) => ({ ...prev, [reportId]: true }));
+    try {
+      const res = await assignmentsApi.autoMatch(reportId);
+      if (res.data.success) {
+        showToast(
+          `Dispatched to ${res.data.data.subGroupId?.name || res.data.data.teamId?.teamName || 'Help Team'} (${res.data.data.assignmentType})!`,
+          'success'
+        );
+        fetchReports();
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to dispatch team', 'error');
+    } finally {
+      setDispatchLoading((prev) => ({ ...prev, [reportId]: false }));
+    }
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      type: '',
+      severity: '',
+      status: '',
+      verificationStatus: '',
+      district: '',
+    });
+  };
+
+  const hasFilters = Object.values(filters).some((v) => v !== '');
 
   return (
     <AdminSidebar>
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Report Management</h1>
-            <p className="text-slate-500 text-sm mt-1">{total} total reports</p>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Disaster Incident Reports
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Verify, triage, update severities, and dispatch nearest Help Teams to reported incidents.
+            </p>
           </div>
-          <button onClick={fetchReports} className="btn-ghost border border-slate-200">
-            <RefreshCw className="w-4 h-4" />
-            Refresh
-          </button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            icon={RefreshCw}
+            onClick={fetchReports}
+            loading={loading}
+          >
+            Refresh Database
+          </Button>
         </div>
 
-        {/* Filters */}
-        <div className="card p-4 mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            <input
-              type="text"
-              placeholder="Search..."
-              value={filters.search}
-              onChange={(e) => setFilter('search', e.target.value)}
-              className="input-field py-2 text-sm col-span-2 md:col-span-1"
+        {/* Filter Controls Bar */}
+        <Card className="p-4 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
+            {/* Search */}
+            <div className="sm:col-span-2 relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                placeholder="Search description, district, town..."
+                className="input-field text-xs pl-9 py-2"
+              />
+            </div>
+
+            {/* Type */}
+            <select
+              value={filters.type}
+              onChange={(e) => handleFilterChange('type', e.target.value)}
+              className="input-field text-xs py-2"
+            >
+              <option value="">All Categories</option>
+              {DISASTER_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+
+            {/* Severity */}
+            <select
+              value={filters.severity}
+              onChange={(e) => handleFilterChange('severity', e.target.value)}
+              className="input-field text-xs py-2"
+            >
+              <option value="">All Severities</option>
+              {SEVERITY_OPTIONS.map((s) => (
+                <option key={s} value={s}>{s.toUpperCase()}</option>
+              ))}
+            </select>
+
+            {/* Status */}
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="input-field text-xs py-2"
+            >
+              <option value="">All Statuses</option>
+              {STATUS_OPTIONS.map((st) => (
+                <option key={st} value={st}>{st}</option>
+              ))}
+            </select>
+
+            {/* District */}
+            <select
+              value={filters.district}
+              onChange={(e) => handleFilterChange('district', e.target.value)}
+              className="input-field text-xs py-2"
+            >
+              <option value="">All Districts</option>
+              {SRI_LANKA_DISTRICTS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+
+          {hasFilters && (
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+              <span className="text-slate-500">
+                Filtered view active (<strong>{total}</strong> records)
+              </span>
+              <button
+                onClick={clearFilters}
+                className="text-xs font-bold text-red-600 hover:text-red-800 hover:underline"
+              >
+                Reset All Filters
+              </button>
+            </div>
+          )}
+        </Card>
+
+        {/* Reports Table / Card Container */}
+        <Card>
+          {loading ? (
+            <LoadingSpinner message="Scanning incident logs..." />
+          ) : reports.length === 0 ? (
+            <EmptyState
+              title="No Disaster Reports Found"
+              message="No incident records match the current filter criteria."
+              actionLabel={hasFilters ? 'Reset Filters' : undefined}
+              onAction={hasFilters ? clearFilters : undefined}
             />
-            <select value={filters.type} onChange={(e) => setFilter('type', e.target.value)} className="input-field py-2 text-sm">
-              <option value="">All Types</option>
-              {DISASTER_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <select value={filters.severity} onChange={(e) => setFilter('severity', e.target.value)} className="input-field py-2 text-sm">
-              <option value="">All Severity</option>
-              {SEVERITY_OPTIONS.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-            </select>
-            <select value={filters.status} onChange={(e) => setFilter('status', e.target.value)} className="input-field py-2 text-sm">
-              <option value="">All Status</option>
-              {STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-            </select>
-            <select value={filters.verificationStatus} onChange={(e) => setFilter('verificationStatus', e.target.value)} className="input-field py-2 text-sm">
-              <option value="">All Verification</option>
-              {VERIFICATION_OPTIONS.map((v) => <option key={v} value={v}>{v.charAt(0).toUpperCase() + v.slice(1)}</option>)}
-            </select>
-            <button onClick={() => setFilters({ search: '', type: '', severity: '', status: '', verificationStatus: '', district: '' })}
-              className="btn-ghost text-sm border border-slate-200 justify-center">
-              Clear
-            </button>
-          </div>
-        </div>
-
-        {/* Table */}
-        {loading ? (
-          <LoadingSpinner message="Loading reports..." />
-        ) : reports.length === 0 ? (
-          <EmptyState title="No reports found" message="Try changing your filters." />
-        ) : (
-          <div className="card overflow-hidden">
+          ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600">Type</th>
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600">Location</th>
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600">Severity</th>
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600">Status</th>
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600">Verification</th>
-                    <th className="text-left px-4 py-3 font-semibold text-slate-600">Reported</th>
-                    <th className="text-right px-4 py-3 font-semibold text-slate-600">Actions</th>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold text-[10px]">
+                    <th className="p-3.5">Category & Location</th>
+                    <th className="p-3.5">Severity</th>
+                    <th className="p-3.5">Verification</th>
+                    <th className="p-3.5">Status</th>
+                    <th className="p-3.5">Reported</th>
+                    <th className="p-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {reports.map((report) => (
-                    <tr key={report._id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedReport(report)}
-                          className="flex items-center gap-2 text-left group"
-                          title="Click to view details in popup"
-                        >
-                          <span className="text-lg group-hover:scale-110 transition-transform">{DISASTER_ICONS[report.type] || '⚠️'}</span>
-                          <span className="font-semibold text-slate-800 group-hover:text-blue-600 underline-offset-2 group-hover:underline">
-                            {report.type}
-                          </span>
-                        </button>
+                    <tr key={report._id} className="hover:bg-slate-50/80 transition-colors">
+                      {/* Category & Location */}
+                      <td className="p-3.5">
+                        <div className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                          <span>{report.type}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3 text-slate-400" />
+                          <span className="font-semibold text-slate-700">{report.district}</span>
+                          {report.area && <span>· {report.area}</span>}
+                        </p>
+                        <p className="text-[11px] text-slate-600 line-clamp-1 max-w-xs mt-1">
+                          {report.description}
+                        </p>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">
-                        <p className="font-medium">{report.district}</p>
-                        {report.area && <p className="text-xs text-slate-400">{report.area}</p>}
-                      </td>
-                      <td className="px-4 py-3">
+
+                      {/* Severity */}
+                      <td className="p-3.5">
                         <select
                           value={report.severity}
                           onChange={(e) => handleSeverityChange(report._id, e.target.value)}
-                          className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="text-[11px] font-bold rounded-lg border border-slate-200 bg-white px-2 py-1 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
                           {SEVERITY_OPTIONS.map((s) => (
-                            <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                            <option key={s} value={s}>{s.toUpperCase()}</option>
                           ))}
                         </select>
                       </td>
-                      <td className="px-4 py-3">
+
+                      {/* Verification Status */}
+                      <td className="p-3.5">
+                        <Badge
+                          variant={
+                            report.verificationStatus === 'verified'
+                              ? 'success'
+                              : report.verificationStatus === 'rejected'
+                              ? 'danger'
+                              : 'warning'
+                          }
+                          size="sm"
+                        >
+                          {report.verificationStatus || 'pending'}
+                        </Badge>
+                      </td>
+
+                      {/* Status */}
+                      <td className="p-3.5">
                         <select
                           value={report.status}
                           onChange={(e) => handleStatusChange(report._id, e.target.value)}
-                          className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="text-[11px] font-bold rounded-lg border border-slate-200 bg-white px-2 py-1 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
-                          {STATUS_OPTIONS.map((s) => (
-                            <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                          {STATUS_OPTIONS.map((st) => (
+                            <option key={st} value={st}>{st}</option>
                           ))}
                         </select>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`badge border ${VERIFICATION_CONFIG[report.verificationStatus]?.color || 'bg-slate-100 text-slate-600'}`}>
-                          {report.verificationStatus}
-                        </span>
+
+                      {/* Reported Time */}
+                      <td className="p-3.5 text-slate-500 whitespace-nowrap">
+                        <span className="font-medium">{timeAgo(report.createdAt)}</span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">{timeAgo(report.createdAt)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-1">
+
+                      {/* Actions */}
+                      <td className="p-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Dispatch Team Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleAutoDispatch(report._id)}
+                            disabled={dispatchLoading[report._id]}
+                            className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Auto-Dispatch Nearest Help Team"
+                          >
+                            <Sparkles className={`w-4 h-4 ${dispatchLoading[report._id] ? 'animate-spin' : ''}`} />
+                          </button>
+
+                          {/* Quick Verify */}
+                          {report.verificationStatus !== 'verified' && (
+                            <button
+                              type="button"
+                              onClick={() => handleVerify(report._id)}
+                              className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-lg transition-colors"
+                              title="Verify Report"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          {/* Quick Reject */}
+                          {report.verificationStatus !== 'rejected' && (
+                            <button
+                              type="button"
+                              onClick={() => handleReject(report._id)}
+                              className="p-1.5 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition-colors"
+                              title="Reject Report"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          )}
+
+                          {/* View Full Dossier */}
                           <button
                             type="button"
                             onClick={() => setSelectedReport(report)}
-                            className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="View report details in popup"
+                            className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                            title="View Full Details"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          {report.verificationStatus === 'pending' && (
-                            <>
-                              <button onClick={() => handleVerify(report._id)} className="p-1.5 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg" title="Verify">
-                                <CheckCircle className="w-4 h-4" />
-                              </button>
-                              <button onClick={() => handleReject(report._id)} className="p-1.5 text-orange-500 hover:text-orange-700 hover:bg-orange-50 rounded-lg" title="Reject">
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                          <button onClick={() => setDeleteConfirm(report._id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Delete">
+
+                          {/* Delete */}
+                          <button
+                            type="button"
+                            onClick={() => setDeleteConfirm(report._id)}
+                            className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete Record"
+                          >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -253,34 +423,34 @@ const AdminReports = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          )}
+        </Card>
+
+        {/* Incident Detail / Edit Modal */}
+        {selectedReport && (
+          <AdminReportModal
+            report={selectedReport}
+            onClose={() => setSelectedReport(null)}
+            onUpdate={() => {
+              setSelectedReport(null);
+              fetchReports();
+            }}
+            onDelete={() => {
+              setSelectedReport(null);
+              fetchReports();
+            }}
+          />
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm && (
+          <ConfirmModal
+            message="Are you sure you want to permanently delete this disaster report? This action cannot be reversed."
+            onConfirm={() => handleDelete(deleteConfirm)}
+            onCancel={() => setDeleteConfirm(null)}
+          />
         )}
       </div>
-
-      {/* Delete Confirm Modal */}
-      {deleteConfirm && (
-        <ConfirmModal
-          message="Are you sure you want to delete this report? This action cannot be undone."
-          onConfirm={() => handleDelete(deleteConfirm)}
-          onCancel={() => setDeleteConfirm(null)}
-        />
-      )}
-
-      {/* Admin Report Detail Modal */}
-      {selectedReport && (
-        <AdminReportModal
-          report={selectedReport}
-          onClose={() => setSelectedReport(null)}
-          onUpdate={(updated) => {
-            setSelectedReport(updated);
-            fetchReports();
-          }}
-          onDelete={(id) => {
-            setSelectedReport(null);
-            fetchReports();
-          }}
-        />
-      )}
     </AdminSidebar>
   );
 };

@@ -1,51 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Phone, AlertTriangle, Flame, Heart, Zap, Droplets, Shield } from 'lucide-react';
+import { Phone, AlertTriangle, Flame, Heart, Zap, Shield, Search, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { emergencyApi } from '../../services/api';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
+import Card from '../../components/common/Card';
+import Badge from '../../components/common/Badge';
 
 const CATEGORY_CONFIG = {
-  police: { icon: Shield, label: 'Police', color: 'bg-blue-50 border-blue-200', iconColor: 'text-blue-600', headerBg: 'bg-blue-600' },
-  fire: { icon: Flame, label: 'Fire & Rescue', color: 'bg-red-50 border-red-200', iconColor: 'text-red-600', headerBg: 'bg-red-600' },
-  medical: { icon: Heart, label: 'Medical', color: 'bg-green-50 border-green-200', iconColor: 'text-green-600', headerBg: 'bg-green-600' },
-  disaster: { icon: AlertTriangle, label: 'Disaster Management', color: 'bg-orange-50 border-orange-200', iconColor: 'text-orange-600', headerBg: 'bg-orange-600' },
-  utility: { icon: Zap, label: 'Utilities', color: 'bg-yellow-50 border-yellow-200', iconColor: 'text-yellow-600', headerBg: 'bg-yellow-600' },
-  other: { icon: Phone, label: 'Other', color: 'bg-slate-50 border-slate-200', iconColor: 'text-slate-600', headerBg: 'bg-slate-600' },
-};
-
-const ContactCard = ({ contact }) => {
-  const config = CATEGORY_CONFIG[contact.category] || CATEGORY_CONFIG.other;
-  const IconComp = config.icon;
-
-  return (
-    <div className={`rounded-2xl border-2 ${config.color} overflow-hidden hover:shadow-md transition-all duration-200`}>
-      <div className={`${config.headerBg} px-4 py-3 flex items-center gap-2`}>
-        <IconComp className="w-4 h-4 text-white" />
-        <span className="text-white text-xs font-bold uppercase tracking-wide">{config.label}</span>
-      </div>
-      <div className="p-5">
-        <h3 className="font-bold text-slate-900 text-lg mb-1">{contact.name}</h3>
-        <p className="text-slate-500 text-sm mb-3">{contact.organization}</p>
-        {contact.description && (
-          <p className="text-slate-600 text-sm mb-4 leading-relaxed">{contact.description}</p>
-        )}
-        <a
-          href={`tel:${contact.phone}`}
-          id={`call-${contact.phone.replace(/\s/g, '')}`}
-          className={`${config.headerBg} hover:opacity-90 text-white font-bold text-xl px-6 py-4 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 shadow-sm`}
-        >
-          <Phone className="w-5 h-5" />
-          {contact.phone}
-        </a>
-      </div>
-    </div>
-  );
+  police: { icon: Shield, label: 'Police & Security', color: 'border-blue-200 bg-blue-50/40', headerBg: 'bg-blue-600', text: 'text-blue-700' },
+  fire: { icon: Flame, label: 'Fire & Rescue', color: 'border-red-200 bg-red-50/40', headerBg: 'bg-red-600', text: 'text-red-700' },
+  medical: { icon: Heart, label: 'Medical & Ambulance', color: 'border-emerald-200 bg-emerald-50/40', headerBg: 'bg-emerald-600', text: 'text-emerald-700' },
+  disaster: { icon: AlertTriangle, label: 'Disaster Coordination', color: 'border-orange-200 bg-orange-50/40', headerBg: 'bg-orange-600', text: 'text-orange-700' },
+  utility: { icon: Zap, label: 'Public Utilities (CEB / Water)', color: 'border-amber-200 bg-amber-50/40', headerBg: 'bg-amber-600', text: 'text-amber-800' },
+  other: { icon: Phone, label: 'Essential Services', color: 'border-slate-200 bg-slate-50/40', headerBg: 'bg-slate-700', text: 'text-slate-700' },
 };
 
 const EmergencyPage = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [search, setSearch] = useState('');
 
   const fetchContacts = async () => {
     setLoading(true);
@@ -60,86 +35,145 @@ const EmergencyPage = () => {
     }
   };
 
-  useEffect(() => { fetchContacts(); }, []);
+  useEffect(() => {
+    fetchContacts();
+  }, []);
 
-  // Group by category
-  const grouped = contacts.reduce((acc, c) => {
-    if (!acc[c.category]) acc[c.category] = [];
-    acc[c.category].push(c);
+  const filtered = contacts.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.organization.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone.includes(search) ||
+      (c.description && c.description.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const grouped = filtered.reduce((acc, c) => {
+    const cat = c.category || 'other';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(c);
     return acc;
   }, {});
 
-  const categoryOrder = ['police', 'fire', 'medical', 'disaster', 'utility', 'other'];
+  const categoryOrder = ['disaster', 'medical', 'police', 'fire', 'utility', 'other'];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Hero */}
-      <div className="bg-gradient-to-br from-red-700 to-red-900 text-white py-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Phone className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-3">🚨 Emergency Contacts</h1>
-          <p className="text-red-200 text-lg mb-6">
-            Official Sri Lankan emergency service numbers. Tap to call.
-          </p>
-          {/* Top 4 quick dial */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
-            {[
-              { name: 'Police', number: '119', bg: 'bg-blue-600' },
-              { name: 'Fire & Rescue', number: '110', bg: 'bg-red-600' },
-              { name: 'Suwa Seriya', number: '1990', bg: 'bg-green-600' },
-              { name: 'Disaster Mgmt', number: '117', bg: 'bg-orange-600' },
-            ].map((c) => (
-              <a
-                key={c.number}
-                href={`tel:${c.number}`}
-                className={`${c.bg} hover:opacity-90 text-white rounded-2xl p-4 text-center transition-all duration-200 shadow-lg`}
-              >
-                <p className="text-xs font-medium opacity-90 mb-1">{c.name}</p>
-                <p className="text-3xl font-black">{c.number}</p>
-                <p className="text-xs opacity-75 mt-1">Tap to call</p>
-              </a>
-            ))}
+    <div className="min-h-screen bg-slate-50 py-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-3 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Home
+          </Link>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
+                <Phone className="w-3.5 h-3.5" />
+                Emergency Operations Dispatch
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                National Emergency Contacts
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Official, verified emergency hotlines across Sri Lanka. One-tap direct dial.
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative min-w-[280px]">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search emergency services..."
+                className="input-field pl-10 text-xs sm:text-sm"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Important disclaimer */}
-      <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center gap-2 text-amber-800 text-sm">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-          <span>
-            <strong>Important:</strong> Always call emergency services directly for life-threatening situations. 
-            This platform is for community information only.
-          </span>
+        {/* Priority 4 Quick Dial Ribbon */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-10">
+          {[
+            { name: 'Disaster Centre (DMC)', number: '117', desc: 'Floods, Earth slips', color: 'bg-red-600' },
+            { name: 'Suwa Seriya Ambulance', number: '1990', desc: 'Free Medical Aid', color: 'bg-emerald-600' },
+            { name: 'Police Emergency', number: '119', desc: 'Crime, Rescue Escort', color: 'bg-blue-600' },
+            { name: 'Fire & Rescue Service', number: '110', desc: 'Fires, Trapped Citizens', color: 'bg-amber-600' },
+          ].map((item) => (
+            <a
+              key={item.number}
+              href={`tel:${item.number}`}
+              className="card p-4 hover:shadow-md transition-all flex items-center justify-between gap-3 border-l-4 border-l-red-600"
+            >
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-900 truncate">{item.name}</p>
+                <p className="text-[11px] text-slate-500 truncate">{item.desc}</p>
+              </div>
+              <span className={`px-3 py-1.5 rounded-xl ${item.color} text-white font-black text-sm flex items-center gap-1 flex-shrink-0 shadow-xs`}>
+                <Phone className="w-3.5 h-3.5" /> {item.number}
+              </span>
+            </a>
+          ))}
         </div>
-      </div>
 
-      {/* All Contacts */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-        <h2 className="text-xl font-bold text-slate-900 mb-6">All Emergency Services</h2>
-
+        {/* Grouped Contacts */}
         {loading ? (
-          <LoadingSpinner message="Loading emergency contacts..." />
+          <LoadingSpinner message="Retrieving national directory..." />
         ) : error ? (
-          <ErrorMessage onRetry={fetchContacts} message="Unable to load emergency contacts." />
+          <ErrorMessage
+            message="Unable to load emergency contacts. Please verify network and retry."
+            onRetry={fetchContacts}
+          />
         ) : (
-          <div className="space-y-8">
-            {categoryOrder.map((cat) => {
-              const catContacts = grouped[cat];
+          <div className="space-y-10">
+            {categoryOrder.map((catKey) => {
+              const catContacts = grouped[catKey];
               if (!catContacts || catContacts.length === 0) return null;
-              const config = CATEGORY_CONFIG[cat];
+              const config = CATEGORY_CONFIG[catKey] || CATEGORY_CONFIG.other;
+              const IconComp = config.icon;
 
               return (
-                <div key={cat}>
-                  <h3 className="font-bold text-slate-700 mb-3 flex items-center gap-2 text-sm uppercase tracking-wide">
-                    <span className={`w-2 h-2 rounded-full ${config.headerBg}`}></span>
-                    {config.label}
-                  </h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {catContacts.map((c) => (
-                      <ContactCard key={c._id} contact={c} />
+                <div key={catKey}>
+                  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
+                    <div className={`w-7 h-7 rounded-lg ${config.headerBg} text-white flex items-center justify-center`}>
+                      <IconComp className="w-4 h-4" />
+                    </div>
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900">{config.label}</h2>
+                    <span className="text-xs text-slate-400 font-semibold ml-auto">
+                      {catContacts.length} services
+                    </span>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {catContacts.map((contact) => (
+                      <Card key={contact._id} className={`p-5 flex flex-col justify-between ${config.color}`}>
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h3 className="font-bold text-slate-900 text-sm">{contact.name}</h3>
+                            <Badge variant="neutral" size="sm">
+                              {contact.category}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-slate-600 font-semibold mb-2">{contact.organization}</p>
+                          {contact.description && (
+                            <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                              {contact.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <a
+                          href={`tel:${contact.phone}`}
+                          className={`w-full py-2.5 px-4 rounded-xl ${config.headerBg} hover:opacity-90 text-white font-extrabold text-sm flex items-center justify-center gap-2 transition-all shadow-2xs`}
+                        >
+                          <Phone className="w-4 h-4" />
+                          <span>Call {contact.phone}</span>
+                        </a>
+                      </Card>
                     ))}
                   </div>
                 </div>
@@ -147,18 +181,6 @@ const EmergencyPage = () => {
             })}
           </div>
         )}
-
-        {/* Report reminder */}
-        <div className="mt-10 card p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 text-center">
-          <h3 className="font-bold text-blue-900 mb-2">Non-Emergency Disaster Report</h3>
-          <p className="text-blue-700 text-sm mb-4">
-            If you witness a disaster or hazard that isn't immediately life-threatening, 
-            help your community by submitting a report.
-          </p>
-          <a href="/report" className="btn-primary">
-            🚨 Submit a Report
-          </a>
-        </div>
       </div>
     </div>
   );

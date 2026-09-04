@@ -108,6 +108,16 @@ const createReport = async (req, res) => {
       reporterContact: reporterContact || '',
     });
 
+    // Auto-match incident to Help Team asynchronously
+    try {
+      const { matchIncidentToTeam } = require('../services/teamMatchingService');
+      matchIncidentToTeam(report._id, report.severity).catch((err) =>
+        console.log('Auto-matching notification:', err.message)
+      );
+    } catch (matchErr) {
+      console.log('Auto-match initiation notice:', matchErr.message);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Report submitted successfully.',

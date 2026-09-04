@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, Filter, RefreshCw, AlertTriangle } from 'lucide-react';
 import { reportsApi } from '../../services/api';
 import DisasterCard from '../../components/disaster/DisasterCard';
 import FilterPanel from '../../components/disaster/FilterPanel';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import EmptyState from '../../components/common/EmptyState';
+import Button from '../../components/common/Button';
 
 const INITIAL_FILTERS = { search: '', type: '', severity: '', status: '', district: '' };
 
@@ -43,21 +44,42 @@ const DisastersPage = () => {
   };
 
   const handleClearFilters = () => setFilters(INITIAL_FILTERS);
-
   const hasFilters = Object.values(filters).some((v) => v !== '');
 
   return (
     <div className="min-h-screen bg-slate-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <LayoutGrid className="w-6 h-6 text-blue-600" />
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Disaster Reports</h1>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Live Situation Monitoring
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Active Disaster Reports
+            </h1>
+            <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
+              Browse, filter, and track reported hazards and emergency operations across Sri Lanka.
+            </p>
           </div>
-          <p className="text-slate-500">
-            Browse and search reported incidents across Sri Lanka.
-          </p>
+
+          <div className="flex items-center gap-2.5">
+            <Button
+              variant="outline"
+              size="sm"
+              icon={RefreshCw}
+              onClick={fetchReports}
+              loading={loading}
+            >
+              Refresh
+            </Button>
+            <a href="/report">
+              <Button variant="danger" size="sm" icon={AlertTriangle}>
+                Report Incident
+              </Button>
+            </a>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -74,38 +96,47 @@ const DisastersPage = () => {
 
           {/* Reports Grid */}
           <div className="flex-1 min-w-0">
-            {/* Result count */}
+            {/* Status bar */}
             {!loading && !error && (
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-slate-500">
+              <div className="flex items-center justify-between mb-4 px-1">
+                <p className="text-xs sm:text-sm text-slate-500 font-medium">
                   {hasFilters ? (
-                    <><strong className="text-slate-700">{total}</strong> results found</>
+                    <>Found <strong className="text-slate-900 font-bold">{total}</strong> incidents matching filters</>
                   ) : (
-                    <><strong className="text-slate-700">{total}</strong> total reports</>
+                    <><strong className="text-slate-900 font-bold">{total}</strong> total disaster incidents</>
                   )}
                 </p>
                 {hasFilters && (
-                  <button onClick={handleClearFilters} className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                    Clear filters
+                  <button
+                    onClick={handleClearFilters}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                  >
+                    Reset all filters
                   </button>
                 )}
               </div>
             )}
 
             {loading ? (
-              <LoadingSpinner message="Loading disaster reports..." />
+              <LoadingSpinner message="Scanning disaster database..." />
             ) : error ? (
               <ErrorMessage
-                message="We couldn't load the disaster reports. Please try again."
+                message="Unable to retrieve disaster records at this moment. Please check network and retry."
                 onRetry={fetchReports}
               />
             ) : reports.length === 0 ? (
               <EmptyState
-                title="No disaster reports found"
-                message={hasFilters ? 'Try changing your filters or search term.' : 'No reports have been submitted yet.'}
+                title="No Reports Found"
+                message={
+                  hasFilters
+                    ? 'No incidents match your current search and filter combination.'
+                    : 'There are currently no active disaster incidents reported.'
+                }
+                actionLabel={hasFilters ? 'Clear Filters' : 'Submit a Report'}
+                onAction={hasFilters ? handleClearFilters : () => (window.location.href = '/report')}
               />
             ) : (
-              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {reports.map((report) => (
                   <DisasterCard key={report._id} report={report} />
                 ))}
