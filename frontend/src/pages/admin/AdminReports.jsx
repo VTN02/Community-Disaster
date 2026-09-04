@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Trash2, CheckCircle, XCircle, Eye, ChevronDown, Filter, RefreshCw } from 'lucide-react';
 import { reportsApi } from '../../services/api';
 import AdminSidebar from '../../components/admin/AdminSidebar';
+import AdminReportModal from '../../components/admin/AdminReportModal';
 import SeverityBadge from '../../components/common/SeverityBadge';
 import StatusBadge from '../../components/common/StatusBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -33,6 +34,7 @@ const AdminReports = () => {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ search: '', type: '', severity: '', status: '', verificationStatus: '', district: '' });
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -177,10 +179,17 @@ const AdminReports = () => {
                   {reports.map((report) => (
                     <tr key={report._id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span>{DISASTER_ICONS[report.type] || '⚠️'}</span>
-                          <span className="font-medium text-slate-800">{report.type}</span>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedReport(report)}
+                          className="flex items-center gap-2 text-left group"
+                          title="Click to view details in popup"
+                        >
+                          <span className="text-lg group-hover:scale-110 transition-transform">{DISASTER_ICONS[report.type] || '⚠️'}</span>
+                          <span className="font-semibold text-slate-800 group-hover:text-blue-600 underline-offset-2 group-hover:underline">
+                            {report.type}
+                          </span>
+                        </button>
                       </td>
                       <td className="px-4 py-3 text-slate-600">
                         <p className="font-medium">{report.district}</p>
@@ -216,9 +225,14 @@ const AdminReports = () => {
                       <td className="px-4 py-3 text-slate-400 text-xs">{timeAgo(report.createdAt)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <Link to={`/disasters/${report._id}`} className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg" title="View">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedReport(report)}
+                            className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="View report details in popup"
+                          >
                             <Eye className="w-4 h-4" />
-                          </Link>
+                          </button>
                           {report.verificationStatus === 'pending' && (
                             <>
                               <button onClick={() => handleVerify(report._id)} className="p-1.5 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg" title="Verify">
@@ -249,6 +263,22 @@ const AdminReports = () => {
           message="Are you sure you want to delete this report? This action cannot be undone."
           onConfirm={() => handleDelete(deleteConfirm)}
           onCancel={() => setDeleteConfirm(null)}
+        />
+      )}
+
+      {/* Admin Report Detail Modal */}
+      {selectedReport && (
+        <AdminReportModal
+          report={selectedReport}
+          onClose={() => setSelectedReport(null)}
+          onUpdate={(updated) => {
+            setSelectedReport(updated);
+            fetchReports();
+          }}
+          onDelete={(id) => {
+            setSelectedReport(null);
+            fetchReports();
+          }}
         />
       )}
     </AdminSidebar>

@@ -4,6 +4,7 @@ import { Activity, AlertTriangle, Clock, CheckCircle, TrendingUp, FileText, Arro
 import { reportsApi } from '../../services/api';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import DisasterCard from '../../components/disaster/DisasterCard';
+import AdminReportModal from '../../components/admin/AdminReportModal';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 
@@ -27,24 +28,41 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState(null);
+
+  const fetchDashboardData = async () => {
+    try {
+      const [statsRes, pendingRes] = await Promise.all([
+        reportsApi.getStats(),
+        reportsApi.getAll({ verificationStatus: 'pending', limit: 6 }),
+      ]);
+      setStats(statsRes.data.data);
+      setPending(pendingRes.data.data);
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [statsRes, pendingRes] = await Promise.all([
-          reportsApi.getStats(),
-          reportsApi.getAll({ verificationStatus: 'pending', limit: 6 }),
-        ]);
-        setStats(statsRes.data.data);
-        setPending(pendingRes.data.data);
-      } catch {
-        // silent
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
+    fetchDashboardData();
   }, []);
+
+  const handleReportUpdate = (updatedReport) => {
+    setPending((prev) =>
+      prev.map((r) => (r._id === updatedReport._id ? updatedReport : r))
+        .filter((r) => r.verificationStatus === 'pending')
+    );
+    setSelectedReport(updatedReport);
+    fetchDashboardData();
+  };
+
+  const handleReportDelete = (deletedId) => {
+    setPending((prev) => prev.filter((r) => r._id !== deletedId));
+    setSelectedReport(null);
+    fetchDashboardData();
+  };
 
   return (
     <AdminSidebar>
@@ -131,11 +149,25 @@ const AdminDashboard = () => {
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {pending.map((report) => (
-                    <DisasterCard key={report._id} report={report} />
+                    <DisasterCard
+                      key={report._id}
+                      report={report}
+                      onClick={(rep) => setSelectedReport(rep)}
+                    />
                   ))}
                 </div>
               )}
             </div>
+
+            {/* Admin Report Detail Modal */}
+            {selectedReport && (
+              <AdminReportModal
+                report={selectedReport}
+                onClose={() => setSelectedReport(null)}
+                onUpdate={handleReportUpdate}
+                onDelete={handleReportDelete}
+              />
+            )}
           </>
         )}
       </div>
