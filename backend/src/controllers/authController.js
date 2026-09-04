@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'disasterlk_jwt_secret_key_2024_secure';
+
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id }, JWT_SECRET, {
     expiresIn: '7d',
   });
 };
