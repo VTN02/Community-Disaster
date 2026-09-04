@@ -2,10 +2,10 @@
   "name": "disaster-management-lk",
   "version": "1.0.0",
   "private": true,
-  "description": "Sri Lanka Community Disaster Management Platform",
+  "workspaces": [
+    "backend"
+  ],
   "scripts": {
-    "postinstall": "cd backend && npm install",
-    "build": "cd backend && npm install",
-    "start": "node backend/src/server.js"
+    "start": "npm start --workspace=disaster-management-lk-backend"
   }
 }
