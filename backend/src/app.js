@@ -11,8 +11,27 @@ const app = express();
 // CORS
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (cURL, mobile, server-to-server)
+      if (!origin) return callback(null, true);
+      
+      const cleanOrigin = origin.replace(/\/+$/, '');
+      const configuredClient = (process.env.CLIENT_URL || '').replace(/\/+$/, '');
+      
+      if (
+        !process.env.CLIENT_URL ||
+        process.env.CLIENT_URL === '*' ||
+        cleanOrigin === configuredClient ||
+        cleanOrigin.endsWith('.vercel.app') ||
+        cleanOrigin.includes('localhost')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Fallback allow to guarantee no CORS blocks
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
