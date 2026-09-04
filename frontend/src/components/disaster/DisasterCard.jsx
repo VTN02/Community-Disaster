@@ -56,24 +56,24 @@ const DisasterCard = ({ report, onClick }) => {
   const isVerified = report.verificationStatus === 'verified';
 
   const cardContent = (
-    <div className={`relative flex flex-col h-full bg-gradient-to-b ${theme.glow} rounded-2xl overflow-hidden border ${theme.border} shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl ${theme.shadow}`}>
+    <div className={`relative flex flex-col h-full bg-gradient-to-b ${theme.glow} rounded-xl sm:rounded-2xl overflow-hidden border ${theme.border} shadow-xs transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl ${theme.shadow}`}>
       {/* Top Hazard Accent Line */}
       <div className={`h-1.5 w-full ${theme.topBar}`} />
 
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
         {/* Header: Hazard Icon, Type & Severity Alert Badge */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl border shadow-sm flex-shrink-0 transition-transform group-hover:scale-105 ${theme.iconBg}`}>
+        <div className="flex flex-wrap sm:flex-nowrap items-start justify-between gap-2.5 mb-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-xl sm:text-2xl border shadow-2xs flex-shrink-0 transition-transform group-hover:scale-105 ${theme.iconBg}`}>
               {icon}
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h3 className="font-extrabold text-slate-900 text-base tracking-tight leading-snug">
+                <h3 className="font-extrabold text-slate-900 text-sm sm:text-base tracking-tight leading-snug truncate">
                   {report.type}
                 </h3>
                 {isVerified && (
-                  <span title="Verified Incident" className="inline-flex text-blue-600">
+                  <span title="Verified Incident" className="inline-flex text-blue-600 flex-shrink-0">
                     <ShieldCheck className="w-4 h-4 fill-blue-100" />
                   </span>
                 )}
@@ -91,8 +91,8 @@ const DisasterCard = ({ report, onClick }) => {
           </div>
 
           {/* Severity Alert Pill with Pulsing Dot */}
-          <div className="flex items-center flex-shrink-0">
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] tracking-wide uppercase shadow-sm ${theme.badge}`}>
+          <div className="flex items-center flex-shrink-0 self-start">
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] tracking-wide uppercase shadow-2xs ${theme.badge}`}>
               <span className="relative flex h-2 w-2">
                 {theme.ping && (
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${theme.dot}`} />
@@ -105,15 +105,15 @@ const DisasterCard = ({ report, onClick }) => {
         </div>
 
         {/* Description & Optional Photo Preview */}
-        <div className="flex gap-3 mb-4 flex-1">
-          <div className="flex-1 bg-white/80 rounded-xl p-3 border border-slate-200/60 shadow-2xs">
-            <p className="text-sm text-slate-700 leading-relaxed line-clamp-2 font-normal">
+        <div className="flex gap-2.5 sm:gap-3 mb-3 sm:mb-4 flex-1">
+          <div className="flex-1 bg-white/85 rounded-xl p-2.5 sm:p-3 border border-slate-200/70 shadow-2xs min-w-0">
+            <p className="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-2 font-normal">
               {report.description || 'No detailed incident description provided.'}
             </p>
           </div>
 
           {report.imageUrl && (
-            <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 flex-shrink-0 bg-slate-100 relative group/img shadow-2xs">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-slate-200 flex-shrink-0 bg-slate-100 relative group/img shadow-2xs">
               <img
                 src={report.imageUrl}
                 alt={report.type}
@@ -127,16 +127,16 @@ const DisasterCard = ({ report, onClick }) => {
         </div>
 
         {/* Footer: Time, Status and Emergency CTA */}
-        <div className="pt-3 border-t border-slate-200/70 flex items-center justify-between gap-2 mt-auto">
-          <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="pt-2.5 sm:pt-3 border-t border-slate-200/70 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 mt-auto">
+          <div className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={report.status} />
-            <span className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
+            <span className="flex items-center gap-1 text-[11px] font-medium text-slate-500 whitespace-nowrap">
               <Clock className="w-3 h-3 text-slate-400" />
               {timeAgo(report.createdAt)}
             </span>
           </div>
 
-          <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 group-hover:text-blue-800 transition-colors">
+          <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 group-hover:text-blue-800 transition-colors ml-auto sm:ml-0">
             View Details
             <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
           </span>
