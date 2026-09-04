@@ -58,4 +58,9 @@ export const emergencyApi = {
   delete: (id) => api.delete(`/emergency-contacts/${id}`),
 };
 
+// Chatbot Assistant
+export const chatApi = {
+  sendMessage: (message) => api.post('/chat', { message }),
+};
+
 export default api;

@@ -5,6 +5,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const emergencyRoutes = require('./routes/emergencyRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/emergency-contacts', emergencyRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Serve frontend static assets in production if built
 const path = require('path');

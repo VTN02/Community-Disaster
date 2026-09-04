@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, AlertTriangle, Phone } from 'lucide-react';
+import { Menu, X, AlertTriangle, Phone, Sparkles } from 'lucide-react';
 
 const navLinks = [
   { to: '/', label: 'Home' },
   { to: '/disasters', label: 'Active Reports' },
   { to: '/map', label: 'Disaster Map' },
+  { to: '/assistant', label: 'AI Assistant', isAi: true },
   { to: '/emergency', label: 'Emergency' },
   { to: '/safety', label: 'Safety Guide' },
   { to: '/about', label: 'About' },
@@ -39,13 +40,19 @@ const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
                   isActive(link.to)
                     ? 'bg-blue-50 text-blue-700'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
+                {link.isAi && <Sparkles className="w-3.5 h-3.5 text-blue-600" />}
                 {link.label}
+                {link.isAi && (
+                  <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    AI
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -85,13 +92,21 @@ const Navbar = () => {
                 key={link.to}
                 to={link.to}
                 onClick={() => setMenuOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   isActive(link.to)
                     ? 'bg-blue-50 text-blue-700'
                     : 'text-slate-600 hover:bg-slate-50'
                 }`}
               >
-                {link.label}
+                <span className="flex items-center gap-2">
+                  {link.isAi && <Sparkles className="w-4 h-4 text-blue-600" />}
+                  {link.label}
+                </span>
+                {link.isAi && (
+                  <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    AI
+                  </span>
+                )}
               </Link>
             ))}
             <Link

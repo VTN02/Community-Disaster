@@ -13,6 +13,7 @@ import MapPage from './pages/public/MapPage';
 import EmergencyPage from './pages/public/EmergencyPage';
 import SafetyPage from './pages/public/SafetyPage';
 import AboutPage from './pages/public/AboutPage';
+import AssistantPage from './pages/public/AssistantPage';
 
 // Admin pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -67,6 +68,15 @@ const App = () => {
               </Layout>
             }
           />
+          <Route
+            path="/assistant"
+            element={
+              <Layout>
+                <AssistantPage />
+              </Layout>
+            }
+          />
+          <Route path="/chat" element={<Navigate to="/assistant" replace />} />
           <Route
             path="/emergency"
             element={
