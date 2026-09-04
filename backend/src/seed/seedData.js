@@ -209,12 +209,11 @@ const seedData = async () => {
     await EmergencyContact.deleteMany({});
     console.log('🗑️  Cleared existing data');
 
-    // Create admin
-    const hashedPassword = await bcrypt.hash('Admin@123', 12);
+    // Create admin (pre('save') hook in Admin model will hash the password once)
     await Admin.create({
       name: 'System Administrator',
       email: 'admin@disasterlk.gov.lk',
-      password: hashedPassword,
+      password: 'Admin@123',
       role: 'admin',
     });
     console.log('👤 Admin created: admin@disasterlk.gov.lk / Admin@123');
