@@ -1,0 +1,152 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ToastContainer } from './components/common/Toast';
+import ProtectedRoute from './routes/ProtectedRoute';
+import Layout from './components/layout/Layout';
+
+// Public pages
+import HomePage from './pages/public/HomePage';
+import ReportPage from './pages/public/ReportPage';
+import DisastersPage from './pages/public/DisastersPage';
+import DisasterDetailPage from './pages/public/DisasterDetailPage';
+import MapPage from './pages/public/MapPage';
+import EmergencyPage from './pages/public/EmergencyPage';
+import SafetyPage from './pages/public/SafetyPage';
+import AboutPage from './pages/public/AboutPage';
+
+// Admin pages
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminReports from './pages/admin/AdminReports';
+import AdminMap from './pages/admin/AdminMap';
+import AdminEmergency from './pages/admin/AdminEmergency';
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public routes — with Layout (Navbar + Footer) */}
+          <Route
+            path="/"
+            element={
+              <Layout>
+                <HomePage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/report"
+            element={
+              <Layout>
+                <ReportPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/disasters"
+            element={
+              <Layout>
+                <DisastersPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/disasters/:id"
+            element={
+              <Layout>
+                <DisasterDetailPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/map"
+            element={
+              <Layout>
+                <MapPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/emergency"
+            element={
+              <Layout>
+                <EmergencyPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/safety"
+            element={
+              <Layout>
+                <SafetyPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <Layout>
+                <AboutPage />
+              </Layout>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute>
+                <AdminReports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/map"
+            element={
+              <ProtectedRoute>
+                <AdminMap />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/emergency"
+            element={
+              <ProtectedRoute>
+                <AdminEmergency />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Redirects */}
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="*" element={
+            <Layout>
+              <div className="min-h-screen flex items-center justify-center text-center px-4">
+                <div>
+                  <p className="text-6xl mb-4">🗺️</p>
+                  <h1 className="text-2xl font-bold text-slate-900 mb-2">Page Not Found</h1>
+                  <p className="text-slate-500 mb-6">The page you're looking for doesn't exist.</p>
+                  <a href="/" className="btn-primary">← Go Home</a>
+                </div>
+              </div>
+            </Layout>
+          } />
+        </Routes>
+
+        <ToastContainer />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+};
+
+export default App;
