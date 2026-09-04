@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Clock, ArrowRight, ShieldCheck, AlertCircle, Camera } from 'lucide-react';
+import SeverityBadge from '../common/SeverityBadge';
 import StatusBadge from '../common/StatusBadge';
 import { DISASTER_ICONS, timeAgo } from '../../utils/constants';
 
@@ -50,11 +51,89 @@ const SEVERITY_THEMES = {
   },
 };
 
-const DisasterCard = ({ report, onClick }) => {
+const DisasterCard = ({ report, onClick, viewMode = 'grid' }) => {
   const icon = DISASTER_ICONS[report.type] || '⚠️';
   const theme = SEVERITY_THEMES[report.severity] || SEVERITY_THEMES.medium;
   const isVerified = report.verificationStatus === 'verified';
 
+  // List View Mode
+  if (viewMode === 'list') {
+    const listContent = (
+      <div className={`relative bg-gradient-to-r ${theme.glow} rounded-xl p-4 sm:p-5 border ${theme.border} shadow-xs hover:shadow-md transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4`}>
+        {/* Left: Icon, Type, District, Description */}
+        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-2xl border shadow-2xs flex-shrink-0 ${theme.iconBg}`}>
+            {icon}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base tracking-tight uppercase">
+                {report.type}
+              </h3>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 bg-white/80 border border-slate-200 px-2.5 py-0.5 rounded-md">
+                <MapPin className="w-3 h-3 text-rose-500" />
+                {report.area && report.area !== 'Please Select' ? `${report.area}, ` : ''}{report.district}
+              </span>
+              {isVerified ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                  <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                  <AlertCircle className="w-3 h-3 text-slate-400" /> Community Report
+                </span>
+              )}
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600 line-clamp-1 leading-relaxed">
+              {report.description || 'No detailed incident description provided.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Right: Badges, Time & Action */}
+        <div className="flex items-center justify-between md:justify-end gap-3 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+          <div className="flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${theme.badge}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`}></span>
+              {theme.label}
+            </span>
+            <StatusBadge status={report.status} />
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 whitespace-nowrap flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {timeAgo(report.createdAt)}
+            </span>
+            <span className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all shrink-0">
+              <ArrowRight className="w-4 h-4" />
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+
+    if (onClick) {
+      return (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => onClick(report)}
+          onKeyDown={(e) => { if (e.key === 'Enter') onClick(report); }}
+          className="group cursor-pointer block text-left focus:outline-none"
+        >
+          {listContent}
+        </div>
+      );
+    }
+
+    return (
+      <Link to={`/disasters/${report._id}`} className="group block focus:outline-none">
+        {listContent}
+      </Link>
+    );
+  }
+
+  // Grid View Mode
   const cardContent = (
     <div className={`relative flex flex-col h-full bg-gradient-to-b ${theme.glow} rounded-xl sm:rounded-2xl overflow-hidden border ${theme.border} shadow-xs transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl ${theme.shadow}`}>
       {/* Top Hazard Accent Line */}

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SE3090 Assignment 2 - Mini Hackathon Documentation Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    :root {
+      --primary: #0f2b5c;
+      --secondary: #e65100;
+      --accent-blue: #0284c7;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-600: #475569;
+      --slate-700: #334155;
+      --slate-900: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: #1e293b;
+      background-color: #f8fafc;
+      line-height: 1.6;
+      font-size: 13.5px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 30px auto;
+      background: #ffffff;
+      padding: 50px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid var(--slate-200);
+    }
+
+    @page {
+      size: A4;
+      margin: 14mm 16mm 14mm 16mm;
+    }
+
+    /* Print styling */
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body {
+        background: #ffffff !important;
+        font-size: 11.5px;
+      }
+      .container {
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        max-width: 100% !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      a {
+        text-decoration: none;
+        color: #0369a1;
+      }
+    }
+
+    /* Header Banner */
+    .header-table {
+      width: 100%;
+      border-bottom: 3px solid var(--primary);
+      padding-bottom: 18px;
+      margin-bottom: 25px;
+    }
+
+    .header-table td {
+      vertical-align: middle;
+    }
+
+    .sliit-badge {
+      font-weight: 800;
+      font-size: 24px;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+    }
+
+    .sliit-sub {
+      color: var(--secondary);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .faculty-meta {
+      text-align: right;
+      font-size: 11px;
+      color: var(--slate-600);
+      line-height: 1.4;
+    }
+
+    .faculty-meta strong {
+      color: var(--slate-900);
+    }
+
+    /* Title Block */
+    .assignment-pill {
+      display: inline-block;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      margin-bottom: 10px;
+      border: 1px solid #bfdbfe;
+    }
+
+    h1.project-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--slate-900);
+      letter-spacing: -0.5px;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    p.project-subtitle {
+      font-size: 13px;
+      color: var(--slate-600);
+      margin-bottom: 22px;
+    }
+
+    /* Meta Info Card */
+    .meta-box {
+      background: #f8fafc;
+      border: 1px solid var(--slate-200);
+      border-left: 4px solid var(--primary);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px 24px;
+    }
+
+    .meta-item {
+      font-size: 12px;
+    }
+
+    .meta-item .label {
+      font-weight: 600;
+      color: var(--slate-600);
+      display: block;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-item .val {
+      font-weight: 700;
+      color: var(--slate-900);
+      word-break: break-all;
+    }
+
+    .meta-item .val a {
+      color: #0284c7;
+      text-decoration: none;
+    }
+
+    /* Section Headings */
+    h2.section-header {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary);
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 30px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3.subsection-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      color: #334155;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 14px;
+      color: #334155;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 20px 0;
+      font-size: 12px;
+    }
+
+    table.data-table th {
+      background: #f1f5f9;
+      color: #0f172a;
+      text-align: left;
+      padding: 9px 12px;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+    }
+
+    table.data-table td {
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+      color: #334155;
+    }
+
+    table.data-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+
+    /* Callout Card */
+    .callout {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #2563eb;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 16px 0;
+      font-size: 12.5px;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 4px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+
+    .badge-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-blue { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-amber { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-red { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    /* Print Button Bar */
+    .print-bar {
+      position: sticky;
+      top: 15px;
+      z-index: 1000;
+      background: #0f172a;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .print-btn {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .print-btn:hover {
+      background: #0369a1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen-Only Action Bar -->
+  <div class="container no-print" style="padding: 0; box-shadow: none; border: none; background: transparent; margin-top: 15px; margin-bottom: 0;">
+    <div class="print-bar">
+      <div>
+        <strong>📄 SLIIT SE3090 Mini Hackathon — Documentation Report Ready</strong>
+        <p style="font-size: 11.5px; color: #94a3b8; margin: 0;">Click the button on the right or press <kbd style="background:#334155; padding: 2px 6px; border-radius: 4px;">Ctrl + P</kbd> to save as a clean PDF.</p>
+      </div>
+      <button class="print-btn" onclick="window.print()">🖨️ Save as PDF</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <table class="header-table">
+      <tr>
+        <td>
+          <div class="sliit-badge">SLIIT</div>
+          <div class="sliit-sub">Faculty of Computing · Department of Software Engineering</div>
+        </td>
+        <td class="faculty-meta">
+          <strong>SE3090 — Software Engineering Frameworks</strong><br>
+          BSc (Hons) in IT (Specializing in SE & AI)<br>
+          Year 3 | Semester 1 | Academic Year 2026<br>
+          <strong>Assignment 2: Mini Hackathon ("Build for Sri Lanka")</strong>
+        </td>
+      </tr>
+    </table>
+
+    <div class="assignment-pill">OFFICIAL ASSESSMENT SUBMISSION REPORT · 100 MARKS (15%)</div>
+    <h1 class="project-title">Disaster Management LK</h1>
+    <p class="project-subtitle">A Community-Powered Disaster Reporting & Emergency Situational Awareness Platform for Sri Lanka</p>
+
+    <!-- Metadata Box -->
+    <div class="meta-box">
+      <div class="meta-item">
+        <span class="label">Assigned Group ID</span>
+        <span class="val">[Insert Group ID, e.g., WE_04]</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Date of Assessment</span>
+        <span class="val">4th September 2026 (In-Class 4-Hour Sprint)</span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Git Repository URL</span>
+        <span class="val"><a href="https://github.com/VTN02/Community-Disaster.git" target="_blank">https://github.com/VTN02/Community-Disaster.git</a></span>
+      </div>
+      <div class="meta-item">
+        <span class="label">Live Deployed Application</span>
+        <span class="val"><a href="https://community-disaster.vercel.app/" target="_blank">https://community-disaster.vercel.app/</a></span>
+      </div>
+      <div class="meta-item" style="grid-column: span 2;">
+        <span class="label">2-Minute Video Demonstration Link</span>
+        <span class="val"><a href="#" target="_blank">[Insert OneDrive / YouTube / Google Drive Video Link]</a></span>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <h2 class="section-header">1. Team Members & Contribution Breakdown</h2>
+    <p>All four registered members contributed actively to the codebase during the supervised 4-hour build session:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 15%;">Student ID</th>
+          <th style="width: 22%;">Student Full Name</th>
+          <th style="width: 23%;">Role / Focus Area</th>
+          <th style="width: 40%;">Key Contributions & Modules Owned</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>[IT Number 1]</strong></td>
+          <td><strong>Vijaya Kumar Vithusan</strong></td>
+          <td>Functional Implementation & Backend Architecture</td>
+          <td>Configured Express.js REST controllers, MongoDB Mongoose models, JWT authentication, Windows DNS SRV resolver fix for MongoDB Atlas, seed data generator, and server environment setup.</td>
+        </tr>
+        <tr>
+          <td><strong>[IT Number 2]</strong></td>
+          <td><strong>Y. H. Prasad</strong></td>
+          <td>UI Development & Component Architecture</td>
+          <td>Built React components with Tailwind CSS; designed executive Hero section with DMC operational visual assets (<code>dmc_slider_04.jpg</code>), Navbar, Footer, Disaster Cards, and mobile drawer.</td>
+        </tr>
+        <tr>
+          <td><strong>[IT Number 3]</strong></td>
+          <td><strong>[Member 3 Full Name]</strong></td>
+          <td>Forms, Validation & Interactive Maps</td>
+          <td>Implemented Disaster Report Form using React Hook Form + Zod, Leaflet/OpenStreetMap GPS pin integration, client-side input validation, and user feedback error alerts.</td>
+        </tr>
+        <tr>
+          <td><strong>[IT Number 4]</strong></td>
+          <td><strong>[Member 4 Full Name]</strong></td>
+          <td>Testing, CI/CD, Documentation & Demo</td>
+          <td>Conducted end-to-end integration testing, managed Git branching and commit logs, configured Vercel production deployment, and coordinated the 2-minute demonstration video.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 2 -->
+    <h2 class="section-header">2. Problem Framing: The Sri Lankan Context</h2>
+    <h3 class="subsection-header">2.1 The Problem</h3>
+    <p>
+      Sri Lanka experiences frequent natural disasters, including severe monsoon-induced flash floods along the Kelani, Kalu, and Gin river basins, dangerous landslides across mountainous terrains (Kandy, Badulla, Kegalle, Nuwara Eliya), and coastal storms. During critical emergency hours, citizens face significant life-safety hazards:
+    </p>
+    <ul>
+      <li><strong>Information Delays:</strong> Formal disaster bulletins often take hours to cascade through official channels to rural and suburban citizens.</li>
+      <li><strong>Lack of Real-Time Ground Intelligence:</strong> Commuters and families do not know if specific bridges, roads, or town centres are impassable or flooded.</li>
+      <li><strong>Social Media Misinformation:</strong> Rumors without geolocation checks spread quickly, confusing affected families and misallocating relief resources.</li>
+      <li><strong>Fragmented Emergency Contacts:</strong> Ordinary citizens struggle to quickly find direct emergency numbers (DMC, Suwa Seriya, Police, Fire) under pressure.</li>
+    </ul>
+
+    <h3 class="subsection-header">2.2 Target Beneficiaries</h3>
+    <p>
+      Ordinary citizens across Sri Lanka’s 25 districts, daily commuters, vulnerable families in flood/landslide zones, and first responders (1990 Suwa Seriya ambulance crews, Police, and local divisional secretariats).
+    </p>
+
+    <!-- Section 3 -->
+    <h2 class="section-header">3. The Proposed Solution: Disaster Management LK</h2>
+    <p>
+      <strong>Disaster Management LK</strong> is a community-powered disaster reporting and situational awareness platform built for rapid public use and administrative verification:
+    </p>
+    <ul>
+      <li><strong>Zero-Barrier Reporting:</strong> Citizens can report local incidents in under 60 seconds without login or signup barriers.</li>
+      <li><strong>Precision Geolocation:</strong> Automatically captures GPS coordinates via browser Geolocation API or allows manual pin drops on an interactive map.</li>
+      <li><strong>Interactive Disaster Map:</strong> Full-screen Leaflet & OpenStreetMap visualization with color-coded severity markers (Critical, High, Medium, Low).</li>
+      <li><strong>Administrative Verification Pipeline:</strong> Designated coordinators inspect, verify, update response status, and filter out misinformation.</li>
+      <li><strong>Speed-Dial Emergency Hotlines:</strong> Direct tap-to-call links for <strong>117 (DMC)</strong>, <strong>119 (Police)</strong>, <strong>1990 (Suwa Seriya Ambulance)</strong>, and <strong>110 (Fire & Rescue)</strong>.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- Section 4 -->
+    <h2 class="section-header">4. Technology Stack Justification</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 25%;">Layer</th>
+          <th style="width: 30%;">Technology Chosen</th>
+          <th style="width: 45%;">Justification & Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Frontend SPA</strong></td>
+          <td>React 18 + Vite 5</td>
+          <td>Declarative component architecture, instantaneous HMR development, and fast sub-10s production builds.</td>
+        </tr>
+        <tr>
+          <td><strong>Styling & Design</strong></td>
+          <td>Tailwind CSS 3</td>
+          <td>Utility-first CSS, mobile-first responsive breakpoints, and consistent emergency-grade color tokens with zero runtime overhead.</td>
+        </tr>
+        <tr>
+          <td><strong>Form Validation</strong></td>
+          <td>React Hook Form + Zod</td>
+          <td>Uncontrolled inputs for performance and strict schema validation providing user-friendly, real-time error messages.</td>
+        </tr>
+        <tr>
+          <td><strong>Geospatial Maps</strong></td>
+          <td>Leaflet + React Leaflet + OSM</td>
+          <td>Completely free and open-source mapping requiring no proprietary API keys, credit cards, or query quotas.</td>
+        </tr>
+        <tr>
+          <td><strong>Backend API</strong></td>
+          <td>Node.js + Express.js</td>
+          <td>Non-blocking asynchronous I/O runtime optimal for handling concurrent citizen disaster reports and lightweight JSON APIs.</td>
+        </tr>
+        <tr>
+          <td><strong>Database</strong></td>
+          <td>MongoDB Atlas + Mongoose</td>
+          <td>Document database accommodating geospatial coordinates and flexible disaster report schemas. Hosted on cloud Atlas replica set.</td>
+        </tr>
+        <tr>
+          <td><strong>Authentication</strong></td>
+          <td>JWT + bcryptjs (12 rounds)</td>
+          <td>Stateless token-based authorization for administrative triage endpoints and password hashing.</td>
+        </tr>
+        <tr>
+          <td><strong>Hosting</strong></td>
+          <td>Vercel (Edge CDN)</td>
+          <td>Global low-latency deployment with automated HTTPS and instant cache invalidation.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 5 -->
+    <h2 class="section-header">5. Compliance with 10 Minimum Software Requirements</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 5%;">#</th>
+          <th style="width: 30%;">Requirement</th>
+          <th style="width: 45%;">Implementation Evidence in Solution</th>
+          <th style="width: 20%;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Clear landing page / UI</td>
+          <td>Executive landing page with national trust badges, DMC operational showcase (<code>dmc_slider_04.jpg</code>), and live KPI cards.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Explanation of Sri Lankan problem</td>
+          <td>Dedicated in-app problem descriptions on Home and About pages highlighting floods, landslides, and road blockages across 25 districts.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>At least two functional features</td>
+          <td>1. Interactive Nationwide Disaster Map with severity pins.<br>2. Real-time Incident Filter & Search Engine.<br>3. Admin Verification Workflow.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Form accepting user input</td>
+          <td>Disaster Incident Reporting Form with GPS location picker, dropdown selectors, area, and description inputs.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Input validation & error messages</td>
+          <td>Zod schema enforcing description length, district selection, and coordinate boundaries with red error text.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Search, filter, calculate & process</td>
+          <td>Keyword search, multi-filter (type, severity, district, status), and Haversine formula calculation for proximity distance.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Responsive desktop & mobile UI</td>
+          <td>Tailwind breakpoints (<code>sm</code> to <code>xl</code>) with mobile slide-out menu and sliding filter drawer.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Basic navigation between screens</td>
+          <td>Sticky navigation bar with active route indicators and footer linking to all pages.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Sample data for chosen problem</td>
+          <td>12 realistic pre-seeded Sri Lankan disaster incidents across Colombo, Kandy, Gampaha, and Ratnapura, plus 8 verified emergency contacts.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>Demonstrated value to Sri Lankan users</td>
+          <td>Empowers public safety, provides instant one-tap 117/1990 hotlines, and offers pre-disaster safety checklists.</td>
+          <td><span class="badge badge-green">Completed</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- Section 6 -->
+    <h2 class="section-header">6. Usage of AI — CLEAR Framework & Prompt Log (Mandatory)</h2>
+
+    <div class="callout">
+      <div class="callout-title">Mandatory AI Usage Declaration (Assignment Section 2.3)</div>
+      <p style="margin: 0;">
+        "This project was built with the assistance of <strong>Antigravity AI (Google DeepMind)</strong>. AI was utilized for component architecture, responsive Tailwind styling, Express REST API routing, troubleshooting Windows DNS SRV queries on MongoDB Atlas, and generating realistic Sri Lankan seed data. Every generated file was reviewed, customized, and verified by the development team. All team members understand and take full ownership of the submitted codebase."
+      </p>
+    </div>
+
+    <h3 class="subsection-header">6.1 Mandatory AI Prompt Log (Section 2.2)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 5%;">#</th>
+          <th style="width: 20%;">AI Tool Used</th>
+          <th style="width: 30%;">Exact Prompt Submitted</th>
+          <th style="width: 20%;">Purpose</th>
+          <th style="width: 25%;">Output Verification & Modifications</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td><strong>Antigravity AI</strong> (Google DeepMind)</td>
+          <td><code>"can you clone https://github.com/VTN02/Community-Disaster.git to this project"</code></td>
+          <td>Clone team repository into working environment.</td>
+          <td>Verified repository structure, files, and git history.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td><strong>Antigravity AI</strong> (Google DeepMind)</td>
+          <td><code>"yes do it"</code> <em>(Follow-up on dependency install and environment setup)</em></td>
+          <td>Install npm dependencies and seed MongoDB Atlas database.</td>
+          <td>Identified Windows Node c-ares DNS SRV error (<code>querySrv ECONNREFUSED</code>). Added <code>dns.setServers(['8.8.8.8', '1.1.1.1'])</code> to <code>db.js</code> and <code>seedData.js</code>. Verified successful connection and data seeding.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td><strong>Antigravity AI</strong> (Google DeepMind)</td>
+          <td><code>"project working well.. now i want to design it more professional .. i also add picture to public folder can you add it to landing page.."</code></td>
+          <td>Upgrade landing page into an executive portal incorporating <code>dmc_slider_04.jpg</code>.</td>
+          <td>Reviewed generated layout, adjusted mobile padding, added top emergency alert ribbon and speed-dial hotline grid. Verified production build with <code>npm run build</code> (0 errors).</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td><strong>Antigravity AI</strong> (Google DeepMind)</td>
+          <td><code>"now i want to design this page more professionally https://community-disaster.vercel.app/disasters"</code></td>
+          <td>Upgrade disaster reports and search page to professional standards.</td>
+          <td>Refactored <code>FilterPanel.jsx</code> with quick preset chips; updated <code>DisasterCard.jsx</code> to support both Grid and List view modes; verified live client-side sorting and filter tag removals.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 7 -->
+    <h2 class="section-header">7. Demonstration Video Script & Guide (2 Minutes)</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width: 15%;">Timestamp</th>
+          <th style="width: 25%;">Section</th>
+          <th style="width: 60%;">Talking Points & Visual Demonstration Flow</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>0:00 - 0:25</strong></td>
+          <td>Problem & Introduction</td>
+          <td>Introduce Team [Group ID]. Explain the Sri Lankan crisis: monsoon flash floods and landslides cause life safety threats while official news is delayed. Introduce Disaster Management LK.</td>
+        </tr>
+        <tr>
+          <td><strong>0:25 - 0:55</strong></td>
+          <td>Reporting & Leaflet Map</td>
+          <td>Demonstrate the <strong>Report Disaster</strong> form: capture GPS location with one click, select hazard type, fill description, and show instant validation. Switch to the <strong>Disaster Map</strong> to show colored severity pins.</td>
+        </tr>
+        <tr>
+          <td><strong>0:55 - 1:25</strong></td>
+          <td>Filtering & Speed Dial</td>
+          <td>Show the <strong>Active Reports</strong> page: demonstrate keyword search, filter by district (e.g. Colombo, Kandy), switch between Grid and List views, and show one-tap emergency calling (117 / 1990).</td>
+        </tr>
+        <tr>
+          <td><strong>1:25 - 1:45</strong></td>
+          <td>Admin Verification Portal</td>
+          <td>Log in with <code>admin@disasterlk.gov.lk</code>: show the moderation queue, verify a pending report, and show how verified status reflects on the public map.</td>
+        </tr>
+        <tr>
+          <td><strong>1:45 - 2:00</strong></td>
+          <td>Deployment & Impact</td>
+          <td>Highlight live Vercel deployment (<code>community-disaster.vercel.app</code>) and mobile responsiveness. Conclude with community impact statement.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Section 8 -->
+    <h2 class="section-header">8. Academic Integrity & Final Declaration</h2>
+    <p>
+      We hereby certify that this project and accompanying documentation represent original work developed during the scheduled SE3090 Assignment 2 Mini Hackathon session on 4th September 2026. All framework integrations, third-party libraries, and AI assistive tools have been transparently declared in accordance with the SLIIT Student Code of Conduct and the CLEAR framework guidelines.
+    </p>
+
+    <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+      <div style="border-top: 1px solid #cbd5e1; padding-top: 8px; font-size: 11.5px; color: #475569;">
+        <strong>Team Lead Signature:</strong> Vijaya Kumar Vithusan<br>
+        Date: 4th September 2026
+      </div>
+      <div style="border-top: 1px solid #cbd5e1; padding-top: 8px; font-size: 11.5px; color: #475569;">
+        <strong>Faculty Evaluation:</strong> SLIIT Faculty of Computing<br>
+        Module: SE3090 Software Engineering Frameworks
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
